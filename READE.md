@@ -2,11 +2,31 @@
 
 [TOC]
 
+### 在此之前：
+
+>  两个问题：
+
+```js
+// 1.
+let a = new Array(5).map(v => {return 5})
+
+// 2.
+let b = { c:[1, 2, 3] }
+
+['a', 'b', 'c'].map(v => {
+  console.log(v)
+})    
+
+console.log(b)        
+```
+
+
+
 ## 起源
 
-数据处理模式
+​    **lodash** 是一个JavaScript库，它内部封装了诸多对字符串、数组、对象等常见数据类型的处理函数，而不扩展任何内置的对象，其中部分是目前 ECMAScript 尚未制定的规范，但同时被业界所认可的辅助函数。目前每天使用 npm 安装 Lodash 的数量在百万级以上，这在一定程度上证明了其代码的健壮性。
 
-​    它已经成为Underscore的超集，提供更一致的API行为，更多功能（如AMD支持，深层克隆和深度合并），更全面的[文档](http://lodash.com/docs)和单元测试（在Node，Ringo，Rhino，Narwhal，PhantomJS中运行的测试和浏览器），更好的整体性能和大型数组/对象迭代的优化，以及更多的自定义构建和模板预编译实用程序的灵活性。
+​    它之前是Underscore的一个fork，随着作者已经成为Underscore的超集，提供更一致的API行为，更多功能（如AMD支持，深层克隆和深度合并），更全面的[文档](http://lodash.com/docs)和单元测试（在Node，Ringo，Rhino，Narwhal，PhantomJS中运行的测试和浏览器），更好的整体性能和大型数组/对象迭代的优化，以及更多的自定义构建和模板预编译实用程序的灵活性。
 
 ​    现在很多主要的npm包都依赖于lodash，如JavaScript转译器[Babel](https://babeljs.io/)、博客平台[Ghost](https://ghost.org/)等。其中Ghost是从Underscore迁移到了lodash。
 
@@ -76,7 +96,7 @@ npm install --save-dev babel-plugin-lodash
 let a = 1
 (() => {
     // do somthing
-})(this)                  // 1 is not a function
+})()                  // 1 is not a function
 
 // 上面这种情况还是好的，至少还能报个错，搞不好某些情况下类似问题代码还能运行，例如：
 let b = { c:[1, 2, 3] }
@@ -126,12 +146,12 @@ console.log(b)
 ```js
 // The `lodash/map` iteratee receives three arguments:
 // (value, index|key, collection)
-_.map(['6', '8', '10'], parseInt);
+_.map(['6', '8', '10'], parseInt)
 // → [6, NaN, 2]
 
 // The `lodash/fp/map` iteratee is capped at one argument:
 // (value)
-fp.map(parseInt)(['6', '8', '10']);
+fp.map(parseInt)(['6', '8', '10'])
 // → [6, 8, 10]
 
 
@@ -140,22 +160,22 @@ _.padStart('a', 3, '-')
 // → '--a'
 
 // `lodash/fp/padStart` does not.
-fp.padStart(3)('a');
+fp.padStart(3)('a')
 // → '  a'
-fp.padCharsStart('-')(3)('a');
+fp.padCharsStart('-')(3)('a')
 // → '--a'
 
 
 // `lodash/filter` is data-first iteratee-last:
 // (collection, iteratee)
 var compact = _.partial(_.filter, _, Boolean);
-compact(['a', null, 'c']);
+compact(['a', null, 'c'])
 // → ['a', 'c']
 
 // `lodash/fp/filter` is iteratee-first data-last:
 // (iteratee, collection)
-var compact = fp.filter(Boolean);
-compact(['a', null, 'c']);
+var compact = fp.filter(Boolean)
+compact(['a', null, 'c'])
 // → ['a', 'c']
 ```
 
@@ -184,8 +204,7 @@ if(this.props.parent && this.props.parent.data && this.props.parent.data.data &&
     // do somthing
 };
 
-// lodash
-
+// lodash 会将没有的属性返回一个 "undefined"
 if(_.get(this.props.parent, 'data.data.somPro')){
     // do somthing
 };
@@ -196,25 +215,38 @@ if(_.get(this.props.parent, 'data.data.somPro')){
 例如：要迭代一个 new Array() 出来的数组
 
 ```js
-let arr = new Array(5).map(() => 1);
-console.log(arr);    //  [,,,,,] length为5的空数组， chrom为 [undefined x 5]
+let arr = new Array(5).map(() => 1)
+console.log(arr)   //  [,,,,,] length为5的空数组， chrom为 [undefined x 5]
 
 // 原生的处理：
 arr1 = Array.from({length:5}).map(()=> 1)
-console.log(arr1);          // [1,1,1,1,1]
+console.log(arr1)          // [1,1,1,1,1]
 
 // lodash 的处理
 _.map(new Array(5),() => 1)
+```
+
+### 链式编程：
+
+```js
+const obj={a: {b: {c: {one: 'blue', two: 'red'}}}}
+_.map(_.get(obj, 'a.b.c'), (item, key)=> item) 
+// chain 开启显示链模式，用value解除(代码量又缩短了，且代码可读性更高)
+_.chain(obj).get('a.b.c').map().value()
 ```
 
 
 
 ### API 增强：
 
-1. Array.prototype.filter 与 _.filter([array], [obj]);
-2. 所有的迭代方法都不会改变原对象，而是返回一个新的对象
+1. Array.prototype.filter 与 _.filter([array], [obj])
+2. fp 所有的迭代方法都不会改变原对象，而是返回一个新的对象
+
+
 
 
 ## 性能
 
 - **惰性求值  （Lazy Evaluation）**
+
+用 lodash 创造的函数函数是 lazy evaluation 的。简单来说，就是当处理过程复杂的情况下，lazy evaluation 可以让计算性能提高非常多。flow 已经自带做了这种性能优化，而原生的链式调用是不会有这种性能优化的。
