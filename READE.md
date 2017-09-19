@@ -26,9 +26,9 @@ console.log(b)
 
 ​    **lodash** 是一个JavaScript库，它内部封装了诸多对字符串、数组、对象等常见数据类型的处理函数，而不扩展任何内置的对象，其中部分是目前 ECMAScript 尚未制定的规范，但同时被业界所认可的辅助函数。目前每天使用 npm 安装 Lodash 的数量在百万级以上，这在一定程度上证明了其代码的健壮性。
 
-​    它之前是Underscore的一个fork，随着作者已经成为Underscore的超集，提供更一致的API行为，更多功能（如AMD支持，深层克隆和深度合并），更全面的[文档](http://lodash.com/docs)和单元测试（在Node，Ringo，Rhino，Narwhal，PhantomJS中运行的测试和浏览器），更好的整体性能和大型数组/对象迭代的优化，以及更多的自定义构建和模板预编译实用程序的灵活性。
+​    它之前是Underscore的一个Fork，随着作者的不断的commits已经成为Underscore的超集，提供更一致的API行为，更多功能（如AMD支持，深层克隆和深度合并），更全面的[文档](http://lodash.com/docs)，更好的整体性能和大型数组/对象迭代的优化，以及更多的自定义构建和模板预编译实用程序的灵活性。
 
-​    现在很多主要的npm包都依赖于lodash，如JavaScript转译器[Babel](https://babeljs.io/)、博客平台[Ghost](https://ghost.org/)等。其中Ghost是从Underscore迁移到了lodash。
+​    现在很多主要的npm包都依赖于lodash，如JavaScript转译器[Babel](https://babeljs.io/)、博客平台[Ghost](https://ghost.org/)等。其中Ghost是从underscore迁移到了lodash。
 
 ---
 
@@ -136,7 +136,7 @@ console.log(b)
 - `Seq`，常用于创建链式调用，提高执行性能（惰性计算）
 - `String`，适用于字符串类型
 
-`lodash/fp` 模块提供了更接近函数式编程的开发方式，其内部的函数经过包装，具有 immutable、auto-curried、iteratee-first、data-last 等特点。Lodash 在 [GitHub Wiki](https://github.com/lodash/lodash/wiki/FP-Guide) 中对 lodash/fp 的特点做了如下概述：
+`lodash/fp` 模块提供了更接近函数式编程的开发方式，其内部的函数经过包装，具有 immutable(固定参数)、auto-curried（柯里化）、iteratee-first、data-last 等特点。Lodash 在 [GitHub Wiki](https://github.com/lodash/lodash/wiki/FP-Guide) 中对 lodash/fp 的特点做了如下概述：
 
 - Fixed Arity，固化参数个数，便于柯里化
 - Rearragned Arguments，重新调整参数位置，便于函数之间的聚合
@@ -183,6 +183,59 @@ compact(['a', null, 'c'])
 
 ## 特色
 
+
+
+### 占位符
+
+lodash 几乎所有的方法都支持占位符模式：
+
+```js
+var whoLoveWho = function(name, like) {
+  return `${name} love ${like}`;
+};
+
+// 普通的 _.partial 用法
+var commonLove = _.partial(whoLoveWho, 'taibowen');
+commonLove('fanbingbing');
+// => 'taibowen love fanbingbing'
+
+// 使用了占位符
+var _love = _.partial(whoLoveWho, _, 'qiqi');
+_.partial('liuyichi');
+// => 'liuyichi love qiqi'
+```
+
+
+
+### 柯里化
+
+```js
+var arr = function(a, b, c) {
+  return [a, b, c];
+};
+
+var curried = _.curry(arr);
+
+curried(1)(2)(3);
+// => [1, 2, 3]
+
+curried(1, 2)(3);
+// => [1, 2, 3]
+
+curried(1, 2, 3);
+// => [1, 2, 3]
+
+// 使用了占位符
+curried(1)(_, 3)(2);
+// => [1, 2, 3]
+```
+
+
+
+
+
+
+
 ### null-safe 空处理：
 
 在接收数据时候很容易因为某个数据为空而产生程序崩溃：
@@ -226,11 +279,20 @@ console.log(arr1)          // [1,1,1,1,1]
 _.map(new Array(5),() => 1)
 ```
 
+
+
+### 无需参数校验
+
+js是弱类型语言,除非加入各种类型检测,否则很难确定传入的array是Array，这就是为什么有时会选择用_.each(array)代替[].forEach, 此处包括空(null/undefined);
+
+
+
 ### 链式编程：
 
 ```js
 const obj={a: {b: {c: {one: 'blue', two: 'red'}}}}
 _.map(_.get(obj, 'a.b.c'), (item, key)=> item) 
+
 // chain 开启显示链模式，用value解除(代码量又缩短了，且代码可读性更高)
 _.chain(obj).get('a.b.c').map().value()
 ```
@@ -240,7 +302,43 @@ _.chain(obj).get('a.b.c').map().value()
 ### API 增强：
 
 1. Array.prototype.filter 与 _.filter([array], [obj])
+
+```js
+var users = [
+  { 'user': 'barney', 'age': 36, 'active': true },
+  { 'user': 'fred',   'age': 40, 'active': false }
+];
+
+// ES6 Array.prototype.filter  (第二个参数必须是一个函数)
+users.filter((v)=>{return !v.active})
+
+// _.filter
+_.filter(users, function(v) { return !v.active; });
+// 2参是一个fuc
+
+// The `_.matches` iteratee shorthand.
+_.filter(users, { 'age': 36, 'active': true });
+// 2参是一个obj
+ 
+// The `_.property` iteratee shorthand.
+_.filter(users, 'active');
+// 2参是一个string
+```
+
 2. fp 所有的迭代方法都不会改变原对象，而是返回一个新的对象
+
+### 更多的 API 
+
+1. 深拷贝：
+
+```js
+var obj = [{ 'a': 1 }, { 'b': 2 }];
+
+var deep = _.cloneDeep(obj);
+console.log(deep[0] === obj[0]);
+// => false
+```
+
 
 
 
