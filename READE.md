@@ -327,9 +327,15 @@ _.filter(users, 'active');
 
 2. fp 所有的迭代方法都不会改变原对象，而是返回一个新的对象
 
+
+
 ### 更多的 API 
 
 1. 深拷贝：
+
+JavaScript 没有直接提供深拷贝的函数，但我们可以用其他函数来模拟，比如 `JSON.parse(JSON.stringify(objectToClone))`，但这种方法要求对象中的属性值不能是函数。或者  用递归把属性链上的所有属性都复制一遍；
+
+Lodash 中的 `_.cloneDeep` 函数封装了深拷贝的逻辑，用起来更加简洁。
 
 ```js
 var obj = [{ 'a': 1 }, { 'b': 2 }];
@@ -339,12 +345,39 @@ console.log(deep[0] === obj[0]);
 // => false
 ```
 
+2. 随机数
 
+```js
+// 原生过去随机数函数
+function getRandomNumber(min, max){
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+getRandomNumber(15, 20);
 
+// Lodash 随机数
+_.random(15, 20, false);
+```
 
+3. 筛选属性
+
+我们可以使用数组、字符串以及函数的方式筛选对象的属性，并且最终会**返回一个新的对象**，不会对旧对象产生影响。
+
+```js
+var obj = {"name": "alin", "car": "bieke", "age": 17};
+
+// Lodash
+var newObj = _.pick(objA, ['car', 'age']);
+// {"car": "bieke", "age": 17}
+```
 
 ## 性能
 
 - **惰性求值  （Lazy Evaluation）**
 
 用 lodash 创造的函数函数是 lazy evaluation 的。简单来说，就是当处理过程复杂的情况下，lazy evaluation 可以让计算性能提高非常多。flow 已经自带做了这种性能优化，而原生的链式调用是不会有这种性能优化的。
+
+
+
+## 小结：
+
+[10 个可用 ES6 替代的 Lodash 特性](http://www.zcfy.cc/article/10-lodash-features-you-can-replace-with-es6-467.html)
