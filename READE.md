@@ -26,7 +26,7 @@ console.log(b)
 
 ​    **lodash** 是一个JavaScript库，它内部封装了诸多对字符串、数组、对象等常见数据类型的处理函数，而不扩展任何内置的对象，其中部分是目前 ECMAScript 尚未制定的规范，但同时被业界所认可的辅助函数。目前每天使用 npm 安装 Lodash 的数量在百万级以上，这在一定程度上证明了其代码的健壮性。
 
-​    它之前是Underscore的一个Fork，随着作者的不断的commits已经成为Underscore的超集，提供更一致的API行为，更多功能（如AMD支持，深层克隆和深度合并），更全面的[文档](http://lodash.com/docs)，更好的整体性能和大型数组/对象迭代的优化，以及更多的自定义构建和模板预编译实用程序的灵活性。
+​    它之前是Underscore的一个Fork，随着作者的不断的commits已经成为Underscore的超集，现在比underscore提供更一致的API行为，更多功能（如AMD支持，深层克隆和深度合并），更全面的[文档](http://lodash.com/docs)，更好的整体性能和大型数组/对象迭代的优化，以及更多的自定义构建和模板预编译实用程序的灵活性。
 
 ​    现在很多主要的npm包都依赖于lodash，如JavaScript转译器[Babel](https://babeljs.io/)、博客平台[Ghost](https://ghost.org/)等。其中Ghost是从underscore迁移到了lodash。
 
@@ -245,8 +245,7 @@ curried(1)(_, 3)(2);
 例如： 我们写了一个 custom 组件，其中想要利用父组件的某个数据做一些事情,如果直接在属性链上取值，其中某一个属性没有的话会报错，所以要做一些判断处理：
 
 ```JS
-// 原生
-
+/** 原生 **/
 if(this.props.parent.(data || {}).(data || {}).somePro){
     // do somthing
 }
@@ -257,7 +256,7 @@ if(this.props.parent && this.props.parent.data && this.props.parent.data.data &&
     // do somthing
 };
 
-// lodash 会将没有的属性返回一个 "undefined"
+/** lodash 会将没有的属性返回一个 "undefined" **/
 if(_.get(this.props.parent, 'data.data.somPro')){
     // do somthing
 };
@@ -271,19 +270,27 @@ if(_.get(this.props.parent, 'data.data.somPro')){
 let arr = new Array(5).map(() => 1)
 console.log(arr)   //  [,,,,,] length为5的空数组， chrom为 [undefined x 5]
 
-// 原生的处理：
+/** 原生的处理：**/
 arr1 = Array.from({length:5}).map(()=> 1)
 console.log(arr1)          // [1,1,1,1,1]
 
-// lodash 的处理
+/** lodash 的处理 **/
 _.map(new Array(5),() => 1)
 ```
 
-
-
 ### 无需参数校验
 
-js是弱类型语言,除非加入各种类型检测,否则很难确定传入的array是Array，这就是为什么有时会选择用_.each(array)代替[].forEach, 此处包括空(null/undefined);
+js是弱类型语言,除非加入各种类型检测,否则很难确定传入的array是Array, 包括传入一个空;
+
+```js
+/**传入参数为对象**/ 
+_.each({a:1,b:2},(v)=>{console.log(v)})
+// => 1,2   迭代的是 obj[k]
+
+/**传入参数为 null **/
+_.each(null, (v)=>{console.log(v)})
+// null
+```
 
 
 
@@ -293,11 +300,12 @@ js是弱类型语言,除非加入各种类型检测,否则很难确定传入的a
 const obj={a: {b: {c: {one: 'blue', two: 'red'}}}}
 _.map(_.get(obj, 'a.b.c'), (item, key)=> item) 
 
-// chain 开启显示链模式，用value解除(代码量又缩短了，且代码可读性更高)
-_.chain(obj).get('a.b.c').map().value()
+/** chain 开启显示链模式，用value解除 (代码量又缩短了，且代码可读性更高) **/
+let getC = _.chain(obj).get('a.b.c').map()
+getC.value()
 ```
 
-
+​	
 
 ### API 增强：
 
@@ -374,7 +382,7 @@ var newObj = _.pick(objA, ['car', 'age']);
 
 - **惰性求值  （Lazy Evaluation）**
 
-用 lodash 创造的函数函数是 lazy evaluation 的。简单来说，就是当处理过程复杂的情况下，lazy evaluation 可以让计算性能提高非常多。flow 已经自带做了这种性能优化，而原生的链式调用是不会有这种性能优化的。
+用 lodash 创造的函数函数是 lazy evaluation 的。使用 Lodash 的链式调用时，只有显示或隐式调用 `.value` 方法才会对链式调用的整个操作进行取值，这种不在声明时立即求值，而在使用时求值的方式，是 Lazy Evaluation 最大的特点。当处理过程复杂的情况下，lazy evaluation 可以让计算性能提高非常多。
 
 
 
