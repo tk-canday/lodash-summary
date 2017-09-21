@@ -245,11 +245,6 @@ curried(1)(_, 3)(2);
 ```
 
 
-
-
-
-
-
 ### null-safe 空处理：
 
 在接收数据时候很容易因为某个数据为空而产生程序崩溃：
@@ -350,6 +345,33 @@ _.filter(users, 'active');
 2. fp 所有的迭代方法都不会改变原对象，而是返回一个新的对象
 
 
+### **Compose**
+
+lodash/fp 下面的所有方法，都是 Auto-curried Iteratee-first Data-last 处理过的，为了 compose 做准备。   
+Auto-curried：所有的方法都是柯理化的  
+Iteratee-first：处理过程（函数）作为第一个参数传入  
+Data-last：处理对象作为最后的参数传入这三个处理
+
+```js
+function a() {
+  return 2*data;
+}
+
+function b() {
+  return -data;
+}
+
+function c() {
+  return data + 3;
+}
+
+// _.flow就是一个compose 方法
+var newFuc = _.flow(a, b ,c);
+newFuc(2);   // => -1
+
+```
+
+ 所谓的compose就是将多基本函数组合成了我们所需要的数据处理函数，然后又把这个数据处理函数与另一个基础函数组合成了另一个数据处理函数。也就是说，我们可以通过 compose 对函数进行任意的组合，这样可以极大的增加函数的灵活性和复用性。
 
 ### 更多的 API 
 
@@ -392,13 +414,39 @@ var newObj = _.pick(objA, ['car', 'age']);
 // {"car": "bieke", "age": 17}
 ```
 
+4. 白名单
+
+```js
+var obj = { 'user': 'fred', 'age': 40 };
+
+_.pick(obj, 'user');
+// => { 'user': 'fred' }
+
+_.omit(obj, 'user');
+// => { 'age': 40 }
+
+```
+
+5. 复杂类型的比较
+```js
+var object = { 'user': 'fred' };
+var other = { 'user': 'fred' };
+
+object == other;
+// => false
+
+_.isEqual(object, other);
+// => true
+```
+
 ## 性能
 
 - **惰性求值  （Lazy Evaluation）**
 
 用 lodash 创造的函数函数是 lazy evaluation 的。使用 Lodash 的链式调用时，只有显示或隐式调用 `.value` 方法才会对链式调用的整个操作进行取值，这种不在声明时立即求值，而在使用时求值的方式，是 Lazy Evaluation 最大的特点。当处理过程复杂的情况下，lazy evaluation 可以让计算性能提高非常多。
 
-
+- **缓存**
+**_.memoize** 将缓存绑定到了缓存函数的 cache 属性上，在创建一个缓存函数时，除了提供原函数 func 用来计算值外，还可以提供 hasher 函数来自定义如何获得缓存的位置。如果 resolver 不设置，则以缓存函数的参数 key 标识缓存位置。
 
 ## 小结：
 
