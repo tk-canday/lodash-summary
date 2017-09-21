@@ -121,6 +121,20 @@ console.log(b)
 其实真正会导致上下行解析出问题的 token 只有 4 个：圆括号，方括号，算数运算符，正则开头的斜杠（除号）。但很少有在代码中用正则、运算符作为行首的情况，所以总结下来就是一句话：当一行的开头是括号或者方括号的时候加上分号就 OK；
 
 
+### 局部变量
+underscore 本身也依赖了不少 js 的原生方法，如下代码所示，lodash 会通过局部变量来保存一些他经常用到的方法或者属性，这样做的好处有如下两点：
+- 在后续使用到这些方法或者属性时，避免了冗长的代码书写;
+- 减少了对象成员的访问深度，(Array.prototype.push --> push), 这样做能带来一定的性能提升;
+```js
+var ArrayProto = Array.prototype, ObjProto = Object.prototype;
+var SymbolProto = typeof Symbol !== 'undefined' ? Symbol.prototype : null;
+
+var push = ArrayProto.push,
+    slice = ArrayProto.slice,
+    toString = ObjProto.toString,
+    hasOwnProperty = ObjProto.hasOwnProperty;
+
+```
 
 ---
 
